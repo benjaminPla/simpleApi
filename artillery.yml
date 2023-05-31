@@ -1,0 +1,31 @@
+config:
+  target: "http://localhost:3000"
+  phases:
+    - duration: 10
+      arrivalRate: 5
+  defaults:
+    headers:
+      Content-Type: "application/json"
+
+scenarios:
+  - flow:
+      - post:
+          url: "/post"
+          json:
+            name: "{{ randomFirstName }}"
+            age: "{{ random.number }}"
+          capture:
+            json: "$.details._id"
+            as: userId
+      - loop:
+          - put:
+              url: "/put/{{ userId }}"
+              json:
+                name: "{{ randomFirstName }}"
+                age: "{{ random.number }}"
+        count: 300
+      - get:
+          url: "/get"
+      - delete:
+          url: "/delete/{{ userId }}"
+    count: 300
