@@ -23,9 +23,9 @@ interface IResponseSuccess {
 
 (async () => {
   try {
-    const client: MongoClient = await MongoClient.connect(
-      "mongodb://localhost:27017"
-    );
+    const connString = "mongodb://172.18.0.2:27017/test";
+    console.log({ connString });
+    const client: MongoClient = await MongoClient.connect(connString);
 
     const db: Db = client.db("test");
     const collection: Collection<IUser> = db.collection("test");

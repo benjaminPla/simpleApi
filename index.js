@@ -18,7 +18,9 @@ const server = (0, express_1.default)();
 server.use(express_1.default.json());
 (() => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const client = yield mongodb_1.MongoClient.connect("mongodb://localhost:27017");
+        const connString = "mongodb://172.18.0.2:27017/test";
+        console.log({ connString });
+        const client = yield mongodb_1.MongoClient.connect(connString);
         const db = client.db("test");
         const collection = db.collection("test");
         console.log("Successfully connected to MongoDB");
