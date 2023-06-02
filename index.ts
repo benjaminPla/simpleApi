@@ -24,7 +24,6 @@ interface IResponseSuccess {
 (async () => {
   try {
     const connString = "mongodb://172.18.0.2:27017/test";
-    console.log({ connString });
     const client: MongoClient = await MongoClient.connect(connString);
 
     const db: Db = client.db("test");
@@ -33,13 +32,20 @@ interface IResponseSuccess {
     console.log("Successfully connected to MongoDB");
 
     server.get("/get", async (req: Request, res: Response) => {
-      const users: IUser[] = await collection.find({}).toArray();
-      res.send(users);
+      console.log("received GET request");
+      try {
+        const users: IUser[] = await collection.find({}).toArray();
+        res.send(users);
+      } catch (error) {
+        res.status(500).send(`there was an error: ${error}`);
+      }
     });
 
     server.post("/post", async (req: Request, res: Response) => {
       try {
         const { name, age }: INewUser = req.body;
+        console.log(`received POST request: ${{ name, age }}`);
+
         const newUser: IUser = { _id: new ObjectId(), name, age };
         await collection.insertOne(newUser);
 
@@ -57,6 +63,8 @@ interface IResponseSuccess {
     server.delete("/delete/:id", async (req: Request, res: Response) => {
       try {
         const { id } = req.params;
+        console.log(`received DELETE request: ${{ id }}`);
+
         await collection.deleteOne({ _id: new ObjectId(id) });
 
         const response: IResponseSuccess = {
@@ -74,6 +82,7 @@ interface IResponseSuccess {
       try {
         const { id } = req.params;
         const { name, age }: INewUser = req.body;
+        console.log(`received PUT request: ${{ id, name, age }}`);
 
         const filter = { _id: new ObjectId(id) };
 

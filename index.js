@@ -19,18 +19,24 @@ server.use(express_1.default.json());
 (() => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const connString = "mongodb://172.18.0.2:27017/test";
-        console.log({ connString });
         const client = yield mongodb_1.MongoClient.connect(connString);
         const db = client.db("test");
         const collection = db.collection("test");
         console.log("Successfully connected to MongoDB");
         server.get("/get", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-            const users = yield collection.find({}).toArray();
-            res.send(users);
+            console.log("received GET request");
+            try {
+                const users = yield collection.find({}).toArray();
+                res.send(users);
+            }
+            catch (error) {
+                res.status(500).send(`there was an error: ${error}`);
+            }
         }));
         server.post("/post", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             try {
                 const { name, age } = req.body;
+                console.log(`received POST request: ${{ name, age }}`);
                 const newUser = { _id: new mongodb_1.ObjectId(), name, age };
                 yield collection.insertOne(newUser);
                 const response = {
@@ -47,6 +53,7 @@ server.use(express_1.default.json());
         server.delete("/delete/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             try {
                 const { id } = req.params;
+                console.log(`received DELETE request: ${{ id }}`);
                 yield collection.deleteOne({ _id: new mongodb_1.ObjectId(id) });
                 const response = {
                     status: "200",
@@ -63,6 +70,7 @@ server.use(express_1.default.json());
             try {
                 const { id } = req.params;
                 const { name, age } = req.body;
+                console.log(`received PUT request: ${{ id, name, age }}`);
                 const filter = { _id: new mongodb_1.ObjectId(id) };
                 const updateObject = {};
                 if (name) {
