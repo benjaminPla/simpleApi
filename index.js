@@ -14,12 +14,21 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const mongodb_1 = require("mongodb");
+const dotenv_1 = __importDefault(require("dotenv"));
+dotenv_1.default.config();
 const server = (0, express_1.default)();
 server.use(express_1.default.json());
 (() => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const connString = "mongodb://172.18.0.2:27017/test";
-        const client = yield mongodb_1.MongoClient.connect(connString);
+        let client;
+        const connString = process.env.MONGO_URL;
+        if (connString) {
+            client = yield mongodb_1.MongoClient.connect(connString);
+        }
+        else {
+            console.log("MongoDB connection string not found.");
+            process.exit(1);
+        }
         const db = client.db("test");
         const collection = db.collection("test");
         console.log("Successfully connected to MongoDB");
@@ -36,7 +45,7 @@ server.use(express_1.default.json());
         server.post("/post", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             try {
                 const { name, age } = req.body;
-                console.log(`received POST request: ${{ name, age }}`);
+                console.log(`received POST request: ${JSON.stringify({ name, age })}`);
                 const newUser = { _id: new mongodb_1.ObjectId(), name, age };
                 yield collection.insertOne(newUser);
                 const response = {
@@ -53,7 +62,7 @@ server.use(express_1.default.json());
         server.delete("/delete/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             try {
                 const { id } = req.params;
-                console.log(`received DELETE request: ${{ id }}`);
+                console.log(`received DELETE request: ${JSON.stringify({ id })}`);
                 yield collection.deleteOne({ _id: new mongodb_1.ObjectId(id) });
                 const response = {
                     status: "200",
@@ -70,7 +79,7 @@ server.use(express_1.default.json());
             try {
                 const { id } = req.params;
                 const { name, age } = req.body;
-                console.log(`received PUT request: ${{ id, name, age }}`);
+                console.log(`received PUT request: ${JSON.stringify({ id, name, age })}`);
                 const filter = { _id: new mongodb_1.ObjectId(id) };
                 const updateObject = {};
                 if (name) {

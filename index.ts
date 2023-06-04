@@ -1,5 +1,7 @@
 import express, { Request, Response } from "express";
 import { MongoClient, Db, Collection, ObjectId } from "mongodb";
+import dotenv from "dotenv";
+dotenv.config();
 
 const server = express();
 server.use(express.json());
@@ -23,8 +25,14 @@ interface IResponseSuccess {
 
 (async () => {
   try {
-    const connString = "mongodb://172.18.0.2:27017/test";
-    const client: MongoClient = await MongoClient.connect(connString);
+    let client: MongoClient;
+    const connString: string | undefined = process.env.MONGO_URL;
+    if (connString) {
+      client = await MongoClient.connect(connString);
+    } else {
+      console.log("MongoDB connection string not found.");
+      process.exit(1);
+    }
 
     const db: Db = client.db("test");
     const collection: Collection<IUser> = db.collection("test");
@@ -44,7 +52,7 @@ interface IResponseSuccess {
     server.post("/post", async (req: Request, res: Response) => {
       try {
         const { name, age }: INewUser = req.body;
-        console.log(`received POST request: ${{ name, age }}`);
+        console.log(`received POST request: ${JSON.stringify({ name, age })}`);
 
         const newUser: IUser = { _id: new ObjectId(), name, age };
         await collection.insertOne(newUser);
@@ -63,7 +71,7 @@ interface IResponseSuccess {
     server.delete("/delete/:id", async (req: Request, res: Response) => {
       try {
         const { id } = req.params;
-        console.log(`received DELETE request: ${{ id }}`);
+        console.log(`received DELETE request: ${JSON.stringify({ id })}`);
 
         await collection.deleteOne({ _id: new ObjectId(id) });
 
@@ -82,7 +90,7 @@ interface IResponseSuccess {
       try {
         const { id } = req.params;
         const { name, age }: INewUser = req.body;
-        console.log(`received PUT request: ${{ id, name, age }}`);
+        console.log(`received PUT request: ${JSON.stringify({ id, name, age })}`);
 
         const filter = { _id: new ObjectId(id) };
 

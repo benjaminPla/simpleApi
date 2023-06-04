@@ -4,10 +4,11 @@
   "main": "index.js",
   "license": "ISC",
   "scripts": {
-      "start": "node index.js",
-      "dev": "tsc && node index.js"
+    "start": "node index.js",
+    "dev": "tsc && node index.js"
   },
   "dependencies": {
+    "dotenv": "^16.1.4",
     "express": "^4.18.2",
     "mongodb": "^5.5.0"
   },
